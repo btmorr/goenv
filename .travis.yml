@@ -3,13 +3,18 @@ language: go
 go:
   - 1.14.x
 
-before_install:
-  - go get -u golang.org/x/tools/cmd/cover
-  - go get github.com/mattn/goveralls
+jobs:
+  include:
+    - stage: test
+      script: make test
+    - stage: install
+      script: go get -u github.com/mattn/goveralls
+    - stage: coveralls
+      script: $GOPATH/bin/goveralls -coverprofile=coverage.out -service=travis-ci
 
-script:
-  - make test
-
-after_script:
-  if: branch = edge
-  - $GOPATH/bin/goveralls -coverprofile=coverage.out -service=travis-ci
+stages:
+  - test
+  - name: install
+    if: branch = edge
+  - name: coveralls
+    if: branch = edge
