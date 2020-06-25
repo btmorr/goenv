@@ -123,7 +123,6 @@ type LatestVersionTestCase struct {
 }
 
 func TestFetchLatestVersion(t *testing.T) {
-	fmt.Println("TestFetchLatestVersion")
 	testCases := []LatestVersionTestCase{
 		{
 			Name:   "key env var clear",
@@ -143,7 +142,6 @@ func TestFetchLatestVersion(t *testing.T) {
 	setupEnvVar(t, keyEnvVar)
 
 	for _, tc := range testCases {
-		fmt.Println("Setting", tc.Key)
 		os.Setenv(keyEnvVar, tc.Key)
 		res := fetchLatestVersion(tc.Short)
 		if res != tc.Expect {

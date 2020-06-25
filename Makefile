@@ -4,7 +4,7 @@ binary_prefix = gvm-
 
 .PHONY: test
 test: app
-	go test -coverprofile=coverage.out ./...
+	go test -v -covermode=count -coverprofile=coverage.out ./...
 
 .PHONY: viewcoverage
 viewcoverage: coverage.out
