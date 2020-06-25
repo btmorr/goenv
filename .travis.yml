@@ -6,15 +6,16 @@ go:
 jobs:
   include:
     - stage: test
-      script: make test
-    - stage: coveralls
+      script:
+        - make test
+    - stage: test-and-coveralls
       script:
         - go get -u github.com/mattn/goveralls
+        - make test
         - $GOPATH/bin/goveralls -coverprofile=coverage.out -service=travis-ci
 
 stages:
-  - test
-  - name: install
-    if: branch = edge
-  - name: coveralls
-    if: branch = edge
+  - name: test
+    if: NOT (branch = edge) OR (type IN (push, pull_request))
+  - name: test-and-coveralls
+    if: (branch = edge) AND (NOT (type IN (push, pull_request)))
