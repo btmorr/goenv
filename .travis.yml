@@ -7,10 +7,10 @@ jobs:
   include:
     - stage: test
       script: make test
-    - stage: install
-      script: go get -u github.com/mattn/goveralls
     - stage: coveralls
-      script: $GOPATH/bin/goveralls -coverprofile=coverage.out -service=travis-ci
+      script:
+        - go get -u github.com/mattn/goveralls
+        - $GOPATH/bin/goveralls -coverprofile=coverage.out -service=travis-ci
 
 stages:
   - test
