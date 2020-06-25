@@ -7,6 +7,9 @@ before_install:
   - go get -u golang.org/x/tools/cmd/cover
   - go get github.com/mattn/goveralls
 
-scripts:
+script:
   - make test
+
+after_script:
+  if: branch = edge
   - $GOPATH/bin/goveralls -coverprofile=coverage.out -service=travis-ci
