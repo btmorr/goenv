@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+gvm_version="0.1.0"
+
+command="$1"
+case "$command" in
+"" )
+  {
+    echo "gvm version $gvm_version"
+  }
+  ;;
+* )
+  {
+    shift 1
+    exec gvm-$command "$@"
+  }
+  ;;
+esac

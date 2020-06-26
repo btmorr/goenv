@@ -1,12 +1,15 @@
-package main
+package fetch
 
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
+	"os/user"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -130,9 +133,9 @@ func getVersionFromModFile(filename string) string {
 	return modFile.Go.Version
 }
 
-// buildTarfileName constructs the name of the tarfile for go for the given
-// version and the current OS and architecture
-func buildTarfileName(version, os, arch string) string {
+// buildArchiveName constructs the name of the [tar|zip]file for go for the
+// given version and the current OS and architecture
+func buildArchiveName(version, os, arch string) string {
 	extensions := map[string]string{
 		"linux":   "tar.gz",
 		"freebsd": "tar.gz",
@@ -142,35 +145,114 @@ func buildTarfileName(version, os, arch string) string {
 	return fmt.Sprintf("go%s.%s-%s.%s", version, os, arch, extensions[os])
 }
 
+// ensureDirectory creates the directory if it does not exist (fail if path
+// exists and is not a directory)
+func ensureDirectory(path string) error {
+	_, err := os.Stat(path)
+	if os.IsNotExist(err) {
+		var fileMode os.FileMode
+		fileMode = os.ModeDir | 0775
+		mdErr := os.MkdirAll(path, fileMode)
+		return mdErr
+	}
+	if err != nil {
+		return err
+	}
+	file, _ := os.Stat(path)
+	if !file.IsDir() {
+		return errors.New(path + " is not a directory")
+	}
+	return nil
+}
+
+// createTmpDir makes a directory named `dir` in the system temporary directory
+// and returns the full path to the created directory
+func createTmpDir(dir string) (string, error) {
+	tmpDir := os.TempDir()
+	dataDir := filepath.Join(tmpDir, dir)
+	err := ensureDirectory(dataDir)
+	return dataDir, err
+}
+
+// getArchive retreives the selected file from the Golang download server, and
+// returns the path where the downloaded file is stored in a temp directory
+func getArchive(name string) string {
+	tempDir, err := createTmpDir(".gvm-tmp")
+	check(err)
+
+	prefix := "https://dl.google.com/go/"
+	req, err := http.NewRequest("GET", prefix+name, nil)
+	check(err)
+	resp, err := Client.Do(req)
+	check(err)
+	defer resp.Body.Close()
+
+	tempFile := filepath.Join(tempDir, name)
+	out, err := os.Create(tempFile)
+	check(err)
+	defer out.Close()
+
+	_, err = io.Copy(out, resp.Body)
+	check(err)
+	return tempFile
+}
+
+func getShimPath() string {
+	user, err := user.Current()
+	check(err)
+	homeDir := user.HomeDir
+	return filepath.Join(homeDir, ".gvm-shims")
+}
+
+// installShim unzips the Archive into a hidden directory under the user home
+// directory, and modifies the PATH environment variable in the current process
+// so that this version of Go is found before the system version, then returns
+// the shim path
+func installShim(archive string, shimPath string) string {
+	// note: move this to either a shell script or a different command
+	err := ensureDirectory(shimPath)
+	check(err)
+
+	currentPath := os.Getenv("PATH")
+	if !strings.Contains(currentPath, shimPath) {
+		os.Setenv("PATH", fmt.Sprintf("%s:%s", shimPath, currentPath))
+	}
+	return shimPath
+}
+
 type Report struct {
 	Os      string
 	Arch    string
 	Version string
-	Tarfile string
+	Archive string
 }
 
-// buildReport compiles all information needed to select a golang install
-// package, based on current os, architecture, and the go version from go.mod
-func buildReport(pwd string) Report {
+// BuildReport is the primary runner for the application. It compiles all
+// information needed to select a golang install package, based on current os,
+// architecture, and the go version from go.mod. Then it downloads the selected
+// file and installs it into a shim directory, modifies the PATH for the
+// current process, and prints a message for the user to suggest a PATH export
+// to add to the shell profile
+func BuildReport(pwd string) Report {
 	_os := runtime.GOOS
 	_arch := runtime.GOARCH
 	_version := getVersionFromModFile(filepath.Join(pwd, "go.mod"))
 	if len(strings.Split(_version, ".")) < 3 {
 		_version = fetchLatestVersion(_version)
 	}
-	fetchName := buildTarfileName(_version, _os, _arch)
+	fetchName := buildArchiveName(_version, _os, _arch)
 
 	return Report{
 		Os:      _os,
 		Arch:    _arch,
 		Version: _version,
-		Tarfile: fetchName}
+		Archive: fetchName}
+}
+
+func FetchArchive(archiveName string) string {
+	return getArchive(archiveName)
 }
 
 func init() {
 	Client = &http.Client{}
-}
-
-func main() {
-	fmt.Printf("%+v\n", buildReport("."))
 }
