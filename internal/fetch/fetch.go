@@ -177,7 +177,7 @@ func createTmpDir(dir string) (string, error) {
 // getArchive retreives the selected file from the Golang download server, and
 // returns the path where the downloaded file is stored in a temp directory
 func getArchive(name string) string {
-	tempDir, err := createTmpDir(".gvm-tmp")
+	tempDir, err := createTmpDir(".goenv-tmp")
 	check(err)
 
 	prefix := "https://dl.google.com/go/"
@@ -201,7 +201,7 @@ func getShimPath() string {
 	user, err := user.Current()
 	check(err)
 	homeDir := user.HomeDir
-	return filepath.Join(homeDir, ".gvm-shims")
+	return filepath.Join(homeDir, ".goenv-shims")
 }
 
 // installShim unzips the Archive into a hidden directory under the user home

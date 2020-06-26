@@ -1,4 +1,4 @@
-module github.com/btmorr/gvm
+module github.com/btmorr/goenv
 
 go 1.14
 

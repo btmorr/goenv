@@ -3,17 +3,17 @@
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 use_shim() {
-  shimpath="$HOME/.gvm/shims/$version"
+  shimpath="$HOME/.goenv/shims/$version"
   if [ ! -e $shimpath ]; then
-    echo "gvm installing shim for go $version"
-    gvm install
+    echo "goenv installing shim for go $version"
+    goenv install
   fi
 
   shim_go="$shimpath/go/bin/go"
   if [ -e $shim_go ]; then
     exec $shim_go "$@"
   else
-    echo "gvm shim does not exist where expected -- falling back to system installation"
+    echo "goenv shim does not exist where expected -- falling back to system installation"
     use_system "$@"
   fi
 }
@@ -31,7 +31,7 @@ use_system() {
   exec $system_go "$@"
 }
 
-version="$(gvm version)"
+version="$(goenv version)"
 if [ $? -ne 0 ]; then
   use_system "$@"
 else

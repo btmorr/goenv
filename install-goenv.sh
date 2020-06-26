@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-shimroot="$HOME/.gvm"
+shimroot="$HOME/.goenv"
 bindir="$shimroot/bin"
 shimdir="$shimroot/shims"
 
@@ -29,17 +29,17 @@ add_export_to_profile() {
     profile=''
     ;;
   esac
-  echo "Adding gvm to PATH in $profile"
+  echo "Adding goenv to PATH in $profile"
 
   if [ -z $profile ]; then
-    echo "To use gvm, add the following to your profile file ($profile)"
-    echo '  export PATH=~/.gvm/bin:$PATH'
+    echo "To use goenv, add the following to your profile file ($profile)"
+    echo '  export PATH=~/.goenv/bin:$PATH'
     echo ''
     echo 'Then, either restart your terminal or enter:'
     echo "  source $profile"
   else
-    echo 'export PATH=~/.gvm/bin:$PATH' >> $profile
-    echo 'gvm has been installed--either restart your terminal or enter:'
+    echo 'export PATH=~/.goenv/bin:$PATH' >> $profile
+    echo 'goenv has been installed--either restart your terminal or enter:'
     echo "  source $profile"
   fi
 }
@@ -58,14 +58,14 @@ copy_package() {
     echo "$system_go" > $shimroot/system_go
   fi
 
-  echo "Installing gvm into $shimroot"
+  echo "Installing goenv into $shimroot"
   cp -R $DIR/bin $shimroot
 
 }
 
 copy_package
 if [[ $PATH =~ $bindir ]]; then
-  echo "gvm already installed in PATH"
+  echo "goenv already installed in PATH"
 else
   add_export_to_profile
 fi

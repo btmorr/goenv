@@ -16,6 +16,6 @@ build: clean
 	gofmt -w -s .
 	mkdir -p package
 	cp -R bin package/bin
-	go build -o package/bin/gvm-fetch cmd/fetch/main.go
-	go build -o package/bin/gvm-version cmd/version/main.go
-	cp install-gvm.sh package
+	go build -o package/bin/goenv-fetch cmd/fetch/main.go
+	go build -o package/bin/goenv-version cmd/version/main.go
+	cp install-goenv.sh package

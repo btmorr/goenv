@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/btmorr/gvm/internal/fetch"
+	"github.com/btmorr/goenv/internal/fetch"
 )
 
 // version determines selects the Go version specified by go.sum in the current
