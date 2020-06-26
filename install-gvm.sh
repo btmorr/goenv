@@ -4,7 +4,6 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 shimroot="$HOME/.gvm"
 bindir="$shimroot/bin"
 shimdir="$shimroot/shims"
-system_go="$(which go)"
 
 add_export_to_profile() {
   shell="$(basename $SHELL)"
@@ -50,12 +49,18 @@ copy_package() {
     rm -rf $bindir
   fi
   mkdir -p $shimdir
+
+  system_go="$(which go)"
+  if [ -z $system_go ]; then
+    echo "No system installation found"
+  else
+    echo "Found system installation at $system_go -- saving as fallback"
+    echo "$system_go" > $shimroot/system_go
+  fi
+
   echo "Installing gvm into $shimroot"
   cp -R $DIR/bin $shimroot
-  if [ -z $system_go ]; then
-    echo "Found system installation at $system_go -- saving as fallback"
-    echo "$system_go\n" > $shimroot/system_go
-  fi
+
 }
 
 copy_package

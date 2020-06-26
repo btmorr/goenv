@@ -1,25 +1,39 @@
 #!/usr/bin/env bash
 
-version="$(gvm version)"
-shimpath="$HOME/.gvm/shims/$version"
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
-if [ ! -e $shimpath ]; then
-  echo "gvm installing shim for go $version"
-  gvm install
-fi
+use_shim() {
+  shimpath="$HOME/.gvm/shims/$version"
+  if [ ! -e $shimpath ]; then
+    echo "gvm installing shim for go $version"
+    gvm install
+  fi
 
-# Check that installation exists, else fall back to system installation
-if [ -f ../system_go ]; then
-  system_go="$(cat ../system_go)"
-fi
+  shim_go="$shimpath/go/bin/go"
+  if [ -e $shim_go ]; then
+    exec $shim_go "$@"
+  else
+    echo "gvm shim does not exist where expected -- falling back to system installation"
+    use_system "$@"
+  fi
+}
 
-shim_go="$shimpath/go/bin/go"
-if [ -e $shim_go ]; then
-  exec $shim_go "$@"
-else
-  if [ ! -z $system_go ]; then
+use_system() {
+  # Check that installation exists, else fall back to system installation
+  if [ -f $DIR/../system_go ]; then
+    system_go="$(cat $DIR/../system_go)"
+  fi
+
+  if [ -z $system_go ]; then
     echo "go.mod file not found and no system installation of go detected"
     exit 1
   fi
   exec $system_go "$@"
+}
+
+version="$(gvm version)"
+if [ $? -ne 0 ]; then
+  use_system "$@"
+else
+  use_shim "$@"
 fi
