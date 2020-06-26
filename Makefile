@@ -19,3 +19,9 @@ build: clean
 	go build -o package/bin/goenv-fetch cmd/fetch/main.go
 	go build -o package/bin/goenv-version cmd/version/main.go
 	cp install-goenv.sh package
+
+.PHONY: pkg
+pkg: build
+	cp -R ./package ./goenv
+	tar -czf goenv.tar.gz ./goenv
+	rm -rf ./goenv
