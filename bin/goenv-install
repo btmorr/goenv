@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
-shimdir="$HOME/.gvm/shims"
-version="$(gvm version)"
+shimdir="$HOME/.goenv/shims"
+version="$(goenv version)"
 
 mkdir -p $shimdir
-tmppath="$(gvm fetch)"
+tmppath="$(goenv fetch)"
 fullpath="$shimdir/$version"
 mkdir -p $fullpath
 tar -xzf $tmppath -C $fullpath

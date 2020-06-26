@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/btmorr/gvm/internal/fetch"
+	"github.com/btmorr/goenv/internal/fetch"
 )
 
 // fetch determines the current OS, architecture, and selects the Go version
