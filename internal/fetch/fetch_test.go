@@ -1,8 +1,7 @@
-package main
+package fetch
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -54,37 +53,8 @@ func TestVersionFromGitHub(t *testing.T) {
 	}
 }
 
-// EnsureDirectory creates the directory if it does not exist (fail if path
-// exists and is not a directory)
-func EnsureDirectory(path string) error {
-	_, err := os.Stat(path)
-	if os.IsNotExist(err) {
-		var fileMode os.FileMode
-		fileMode = os.ModeDir | 0775
-		mdErr := os.MkdirAll(path, fileMode)
-		return mdErr
-	}
-	if err != nil {
-		return err
-	}
-	file, _ := os.Stat(path)
-	if !file.IsDir() {
-		return errors.New(path + " is not a directory")
-	}
-	return nil
-}
-
-// CreateTmpDir makes a directory named `dir` in the system temporary directory
-// and returns the full path to the created directory
-func CreateTmpDir(dir string) (string, error) {
-	tmpDir := os.TempDir()
-	dataDir := filepath.Join(tmpDir, dir)
-	err := EnsureDirectory(dataDir)
-	return dataDir, err
-}
-
 func setupTestMod(t *testing.T, version string) string {
-	testDir, err := CreateTmpDir(".test-tmp")
+	testDir, err := createTmpDir(".test-tmp")
 	check(err)
 	modFileText := []byte("module testy\n\ngo " + version)
 	testFileName := filepath.Join(testDir, "go.mod")
@@ -150,7 +120,7 @@ func TestFetchLatestVersion(t *testing.T) {
 	}
 }
 
-type TarfileTestCase struct {
+type ArchiveTestCase struct {
 	Name    string
 	Version string
 	Os      string
@@ -158,8 +128,8 @@ type TarfileTestCase struct {
 	Expect  string
 }
 
-func TestBuildTarfileName(t *testing.T) {
-	testCases := []TarfileTestCase{
+func TestBuildArchiveName(t *testing.T) {
+	testCases := []ArchiveTestCase{
 		{
 			Name:    "linux arm64",
 			Version: "1.12.17",
@@ -180,7 +150,7 @@ func TestBuildTarfileName(t *testing.T) {
 			Expect:  "go1.14.1.darwin-amd64.tar.gz"}}
 
 	for _, tc := range testCases {
-		res := buildTarfileName(tc.Version, tc.Os, tc.Arch)
+		res := buildArchiveName(tc.Version, tc.Os, tc.Arch)
 		if res != tc.Expect {
 			t.Errorf("[%s] expected %s, got %s\n", tc.Name, tc.Expect, res)
 		}
@@ -199,14 +169,14 @@ func TestBuildReport(t *testing.T) {
 	_os := runtime.GOOS
 	_arch := runtime.GOARCH
 
-	_tarfile := fmt.Sprintf("go%s.%s-%s", _fullversion, _os, _arch)
+	_Archive := fmt.Sprintf("go%s.%s-%s", _fullversion, _os, _arch)
 	if _os == "windows" {
-		_tarfile = _tarfile + ".zip"
+		_Archive = _Archive + ".zip"
 	} else {
-		_tarfile = _tarfile + ".tar.gz"
+		_Archive = _Archive + ".tar.gz"
 	}
 
-	r := buildReport(td)
+	r := BuildReport(td)
 	if r.Os != _os {
 		t.Errorf("[report] expected os %s, got %s\n", _os, r.Os)
 	}
@@ -216,7 +186,7 @@ func TestBuildReport(t *testing.T) {
 	if r.Version != _fullversion {
 		t.Errorf("[report] expected version %s, got %s\n", _fullversion, r.Version)
 	}
-	if r.Tarfile != _tarfile {
-		t.Errorf("[report] expected tarfile %s, got %s\n", _tarfile, r.Tarfile)
+	if r.Archive != _Archive {
+		t.Errorf("[report] expected Archive %s, got %s\n", _Archive, r.Archive)
 	}
 }

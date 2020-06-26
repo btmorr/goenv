@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+command="$1"
+case "$command" in
+"" )
+  {
+    echo "No command specified"
+  } | exit 1
+  ;;
+"dry-run" )
+  {
+    exec gvm-install --dry
+  }
+  ;;
+* )
+  {
+    shift 1
+    exec gvm-$command "$@"
+  }
+  ;;
+esac

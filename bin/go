@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+version="$(gvm version)"
+echo "Detected version $version"
+shimpath="$HOME/.gvm/shims/$version"
+
+if [ -e shimpath ]; then
+  echo "Already installed"
+else
+  echo "Installing shim"
+  gvm install
+fi
+
+# Check that installation exists, else fall back to system installation
+shim_go="$shimpath/go/bin/go"
+if [ -e $shim_go ]; then
+  echo "Using shim: $shim_go"
+  exec $shim_go "$@"
+else
+  echo "Using system installation"
+  exec /usr/local/go/bin/go "$@"
+fi

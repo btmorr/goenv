@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+shimdir="$HOME/.gvm/shims"
+version="$(gvm version)"
+
+opts="$1"
+case "$opts" in
+"--dry" | "-d" )
+  {
+    echo "Dry run"
+    echo "Make $shimdir if it does not exist"
+    tmppath="$(gvm fetch-dry-run)"
+    fullpath="$shimdir/$version"
+    echo "Fetch $tmppath"
+    echo "Extract archive to $fullpath"
+  }
+  ;;
+* )
+  {
+    echo "Making $shimdir if it does not exist"
+    mkdir -p $shimdir
+    echo "Fetching archive"
+    tmppath="$(gvm fetch)"
+    echo "Fetched $version"
+    fullpath="$shimdir/$version"
+    echo "Extracting archive to $fullpath"
+    mkdir -p $fullpath
+    tar -xzf $tmppath -C $fullpath
+  }
+  ;;
+esac

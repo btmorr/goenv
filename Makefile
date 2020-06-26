@@ -1,9 +1,5 @@
-version = 0.1.0
-run_opts ?=
-binary_prefix = gvm-
-
 .PHONY: test
-test: app
+test:
 	go test -v -covermode=count -coverprofile=coverage.out ./...
 
 .PHONY: viewcoverage
@@ -13,14 +9,14 @@ viewcoverage: coverage.out
 .PHONY: clean
 clean:
 	go clean
-	rm ./$(binary_prefix)* || true
+	rm -rf package
 
-.PHONY: app
-app: clean
+.PHONY: build
+build: clean
 	gofmt -w -s .
-	go vet
-	go build -o $(binary_prefix)$(version)
-
-.PHONY: run
-run: gvm-$(version)
-	./gvm-$(version) $(run_opts)
+	mkdir -p package
+	cp -R bin package/bin
+	go build -o package/bin/gvm-fetch cmd/fetch/main.go
+	go build -o package/bin/gvm-fetch-dry-run cmd/fetch-dry-run/main.go
+	go build -o package/bin/gvm-version cmd/version/main.go
+	cp install-gvm.sh package
