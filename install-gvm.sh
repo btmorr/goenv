@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 shimroot="$HOME/.gvm"
 bindir="$shimroot/bin"
 shimdir="$shimroot/shims"
+system_go="$(which go)"
 
 add_export_to_profile() {
   shell="$(basename $SHELL)"
@@ -47,16 +49,18 @@ copy_package() {
   if [ -e $bindir ]; then
     rm -rf $bindir
   fi
-  mkdir -p $bindir
   mkdir -p $shimdir
-  cp -R bin $shimroot
+  echo "Installing gvm into $shimroot"
+  cp -R $DIR/bin $shimroot
+  if [ -z $system_go ]; then
+    echo "Found system installation at $system_go -- saving as fallback"
+    echo "$system_go\n" > $shimroot/system_go
+  fi
 }
 
-# todo: save file with path to previous installation of go
-
+copy_package
 if [[ $PATH =~ $bindir ]]; then
   echo "gvm already installed in PATH"
 else
-  copy_package
   add_export_to_profile
 fi

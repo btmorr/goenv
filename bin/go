@@ -1,22 +1,25 @@
 #!/usr/bin/env bash
 
 version="$(gvm version)"
-echo "Detected version $version"
 shimpath="$HOME/.gvm/shims/$version"
 
-if [ -e shimpath ]; then
-  echo "Already installed"
-else
-  echo "Installing shim"
+if [ ! -e $shimpath ]; then
+  echo "gvm installing shim for go $version"
   gvm install
 fi
 
 # Check that installation exists, else fall back to system installation
+if [ -f ../system_go ]; then
+  system_go="$(cat ../system_go)"
+fi
+
 shim_go="$shimpath/go/bin/go"
 if [ -e $shim_go ]; then
-  echo "Using shim: $shim_go"
   exec $shim_go "$@"
 else
-  echo "Using system installation"
-  exec /usr/local/go/bin/go "$@"
+  if [ ! -z $system_go ]; then
+    echo "go.mod file not found and no system installation of go detected"
+    exit 1
+  fi
+  exec $system_go "$@"
 fi
