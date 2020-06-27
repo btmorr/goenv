@@ -17,7 +17,6 @@ build: clean
 	mkdir -p package
 	cp -R bin package/bin
 	go build -o package/bin/goenv-fetch cmd/fetch/main.go
-	go build -o package/bin/goenv-version cmd/version/main.go
 	cp install-goenv.sh package
 
 .PHONY: pkg
