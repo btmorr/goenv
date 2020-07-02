@@ -9,11 +9,11 @@ use_shim() {
     goenv install
   fi
 
-  shim_go="$shimpath/go/bin/go"
-  if [ -e $shim_go ]; then
+  shim_gofmt="$shimpath/go/bin/gofmt"
+  if [ -e $shim_gofmt ]; then
     export GOROOT=$shimpath/go
     export GOPATH=$GOROOT/bin
-    $shim_go "$@"
+    $shim_gofmt "$@"
   else
     echo "goenv shim does not exist where expected -- falling back to system installation"
     use_system "$@"
@@ -23,7 +23,7 @@ use_shim() {
 use_system() {
   # Check that installation exists, else fall back to system installation
   if [ -f $DIR/../system_go ]; then
-    system_go="$(cat $DIR/../system_go)/go"
+    system_go="$(cat $DIR/../system_go)/gofmt"
   fi
 
   if [ -z $system_go ]; then

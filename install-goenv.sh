@@ -5,7 +5,7 @@ shimroot="$HOME/.goenv"
 bindir="$shimroot/bin"
 shimdir="$shimroot/shims"
 
-add_export_to_profile() {
+suggest_export_to_profile() {
   shell="$(basename $SHELL)"
 
   case "$shell" in
@@ -29,19 +29,27 @@ add_export_to_profile() {
     profile=''
     ;;
   esac
-  echo "Adding goenv to PATH in $profile"
 
-  if [ -z $profile ]; then
-    echo "To use goenv, add the following to your profile file ($profile)"
-    echo '  export PATH=~/.goenv/bin:$PATH'
-    echo ''
-    echo 'Then, either restart your terminal or enter:'
-    echo "  source $profile"
-  else
-    echo 'export PATH=~/.goenv/bin:$PATH' >> $profile
-    echo 'goenv has been installed--either restart your terminal or enter:'
-    echo "  source $profile"
-  fi
+  echo "To use goenv, modify your profile file (probably $profile) to include"
+  echo '"~/.goenv/bin" in the PATH. Important note: for security, ensure that'
+  echo "both goenv\'s bin directory, and GOPATH are at the end of your PATH,"
+  echo 'not the beginning. For goenv to work, it will need to be earlier in'
+  echo 'your PATH than GOPATH. Your regular Go installation, and goenv should'
+  echo 'look something like this in your profile:'
+  echo ''
+  echo '  export GOPATH=/usr/local/go/bin'
+  echo '  export PATH=$PATH:$HOME/.goenv/bin:$GOPATH'
+  echo ''
+  echo 'or:'
+  echo ''
+  echo '  export GOPATH=/usr/local/go/bin'
+  echo '  export PATH=$PATH:$HOME/.goenv/bin'
+  echo '  export PATH=$PATH:$GOPATH'
+  echo ''
+  echo 'Once you have modified your profile, either restart your terminal, or,'
+  echo "presuming you are using $profile, do:"
+  echo ''
+  echo "  source $profile"
 }
 
 copy_package() {
@@ -55,7 +63,7 @@ copy_package() {
     echo "No system installation found"
   else
     echo "Found system installation at $system_go -- saving as fallback"
-    echo "$system_go" > $shimroot/system_go
+    echo "$(dirname $system_go)" > $shimroot/system_go
   fi
 
   echo "Installing goenv into $shimroot"
@@ -67,5 +75,5 @@ copy_package
 if [[ $PATH =~ $bindir ]]; then
   echo "goenv already installed in PATH"
 else
-  add_export_to_profile
+  suggest_export_to_profile
 fi
